@@ -1,0 +1,138 @@
+<!--
+    This is what the embed iframe src links to. It doesn't need to communicate with the parent page, only fill the available space and look for #? parameters
+-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" type="text/css" href="uv/uv.css">
+    <script type="text/javascript" src="uv/lib/offline.js"></script>
+    <script type="text/javascript" src="uv/helpers.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script type="text/javascript">
+
+    var loadedIePid;
+    var loadedFlPid;
+	var collectionUrl ="";
+    var entiteit;   
+	var seqIndex=0;	
+	    function getQueryVariable(variable)
+		    {
+	        	var query = window.location.search.substring(1);
+                var result = 'false';
+	        	var vars = query.split("&");
+		        for (var i=0;i<vars.length;i++) {
+        		    var pair = vars[i].split("=");
+
+		            if(pair[0] == variable){
+				result = pair[1];
+				}
+       		}
+        	return(result);
+	    }
+
+    loadedIePid = getQueryVariable("dps_pid");
+    entiteit = getQueryVariable("entiteit");
+	if (entiteit != "false") {
+		collectionUrl = 'https://services.libis.be/m2/manifest/'+entiteit;
+		if (loadedIePid != "false") {
+        jQuery.get(collectionUrl,
+        function(d,s,x)
+        {
+                var first = true;
+                var iePidAvailable = false;
+                for (i = 0; i <d.manifests.length; i++) {
+                  // do something for each node
+                    y = JSON.stringify(d.manifests[i]);
+					if (y.search(loadedIePid) > 0) {
+						seqIndex = i;
+						break;
+					}
+				}
+		},
+        'json');
+		} else {
+			seqIndex = 0;
+		} 		
+	} else {
+		collectionUrl = 'https://lib.is/'+loadedIePid+ '/manifest';
+		seqIndex = 1;
+	
+	}
+    window.addEventListener('uvLoaded', function(e) { 
+            urlDataProvider = new UV.URLDataProvider(true);
+            var formattedLocales;
+            var locales = urlDataProvider.get('locales', '');
+
+            if (locales) {
+                var names = locales.split(',');
+                formattedLocales = [];
+
+                for (var i in names) {
+                    var nameparts = String(names[i]).split(':');
+                    formattedLocales[i] = {name: nameparts[0], label: nameparts[1]};
+                }
+                
+            } else {
+                formattedLocales = [
+                    {
+                        name: 'en-GB'
+                    }
+                ]
+            }
+
+            uv = createUV('#uv', {
+                iiifResourceUri:collectionUrl,
+                configUri:'uv-config.json',
+                collectionIndex: Number(urlDataProvider.get('c', 0)),
+                manifestIndex: Number(urlDataProvider.get('m', seqIndex)),
+                sequenceIndex: Number(urlDataProvider.get('s', 0)),
+                canvasIndex: Number(urlDataProvider.get('cv', 0)),
+                rangeId: urlDataProvider.get('rid', 0),
+                rotation: Number(urlDataProvider.get('r', 0)),
+                xywh: urlDataProvider.get('xywh', ''),
+                embedded: true,
+                locales: formattedLocales
+            }, urlDataProvider);
+
+        }, false);
+    </script>
+</head>    
+<body>
+
+<div id="uv" class="uv"></div>
+
+<script>
+
+    $(function() {
+
+        var $UV = $('#uv');
+
+        function resize() {
+            var windowWidth = window.innerWidth;
+            var windowHeight = window.innerHeight;
+            $UV.width(windowWidth);
+            $UV.height(windowHeight);
+        }
+
+        $(window).on('resize', function() {
+            resize();
+        });
+        
+        resize();
+    });
+    
+</script>
+
+<script type="text/javascript" src="uv/uv.js"></script>
+
+</body>
+</html>
