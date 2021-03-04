@@ -8,6 +8,7 @@ import {InformationFactory} from "../uv-shared-module/InformationFactory";
 
 export class HeaderPanel extends BaseView {
 
+    $leftOptions: JQuery;
     $centerOptions: JQuery;
     $helpButton: JQuery;
     $informationBox: JQuery;
@@ -15,6 +16,7 @@ export class HeaderPanel extends BaseView {
     $options: JQuery;
     $rightOptions: JQuery;
     $settingsButton: JQuery;
+    $logo: JQuery;
     information: Information;
 
     constructor($element: JQuery) {
@@ -38,14 +40,17 @@ export class HeaderPanel extends BaseView {
         this.$options = $('<div class="options"></div>');
         this.$element.append(this.$options);
 
+        this.$leftOptions = $('<div class="leftOptions"></div>');
+        this.$options.append(this.$leftOptions);
+
+        this.$logo = $('<a href="http://www.lias.be/lias/teneo-opslag-preservatie" target="_blank" style="display: block;width: 128px;height: 33px;opacity: 0.9;background: url(images/TENEO_LOGO.png);no-repeat 0 0: ;background-size: 100% 100%;"></a>');
+        this.$leftOptions.append(this.$logo);
+        
         this.$centerOptions = $('<div class="centerOptions"></div>');
         this.$options.append(this.$centerOptions);
 
         this.$rightOptions = $('<div class="rightOptions"></div>');
         this.$options.append(this.$rightOptions);
-
-        //this.$helpButton = $('<a href="#" class="action help">' + this.content.help + '</a>');
-        //this.$rightOptions.append(this.$helpButton);
 
         this.$localeToggleButton = $('<a class="localeToggle" tabindex="0"></a>');
         this.$rightOptions.append(this.$localeToggleButton);
